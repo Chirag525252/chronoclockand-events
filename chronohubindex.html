@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Calendar & Time Manager</title>
+  <link rel="stylesheet" href="chronohubstyle.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <script src="chronohubjs.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Fraunces:wght@700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ============ SIDEBAR NAV ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">◈</span>
+    <span class="logo-text">ChronoHub</span>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-tab="calendar" title="Calendar">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Calendar</span>
+    </button>
+    <button class="nav-btn" data-tab="alarm" title="Alarm">
+      <span class="nav-icon">⏰</span>
+      <span class="nav-label">Alarm</span>
+    </button>
+    <button class="nav-btn" data-tab="timer" title="Timer">
+      <span class="nav-icon">⏱</span>
+      <span class="nav-label">Timer</span>
+    </button>
+    <button class="nav-btn" data-tab="stopwatch" title="Stopwatch">
+      <span class="nav-icon">🏁</span>
+      <span class="nav-label">Stopwatch</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+      <span id="themeIcon">🌙</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+  <!-- ===== CALENDAR SECTION ===== -->
+  <section class="tab-section active" id="tab-calendar">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Smart Calendar</h1>
+        <p class="section-subtitle" id="liveClock">Loading...</p>
+      </div>
+      <div class="header-actions">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍  Search events…" />
+        <button class="btn btn-outline" id="exportBtn" title="Export events">⬇ Export</button>
+        <label class="btn btn-outline" title="Import events">
+          ⬆ Import <input type="file" id="importFile" accept=".json" hidden />
+        </label>
+        <button class="btn btn-outline" id="holidayToggle">🎉 Holidays</button>
+        <button class="btn btn-outline" id="printBtn">🖨 Print</button>
+      </div>
+    </div>
+
+    <div class="calendar-layout">
+      <!-- Calendar grid -->
+      <div class="calendar-card">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" id="prevMonth">‹</button>
+          <h2 class="cal-month-label" id="monthLabel">Month Year</h2>
+          <button class="cal-nav-btn" id="nextMonth">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+          <span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+
+        <!-- Monthly stats -->
+        <div class="cal-stats" id="calStats"></div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <div class="side-panel-header">
+          <h3 id="sidePanelDate">Select a date</h3>
+          <button class="btn btn-primary btn-sm" id="addEventBtn">+ Add Event</button>
+        </div>
+        <div class="events-list" id="eventsList">
+          <p class="empty-state">Click a date to view or add events.</p>
+        </div>
+
+        <!-- Search results -->
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ALARM SECTION ===== -->
+  <section class="tab-section" id="tab-alarm">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Alarm Clock</h1>
+        <p class="section-subtitle">Set multiple alarms</p>
+      </div>
+    </div>
+    <div class="tool-layout">
+      <div class="tool-card">
+        <div class="clock-display" id="clockDisplay">00:00:00</div>
+        <div class="form-group">
+          <label>Hour</label>
+          <input type="number" id="alarmHour" min="0" max="23" value="7" class="time-input" />
+        </div>
+        <div class="form-group">
+          <label>Minute</label>
+          <input type="number" id="alarmMinute" min="0" max="59" value="0" class="time-input" />
+        </div>
+        <div class="form-group">
+          <label>Label</label>
+          <input type="text" id="alarmLabel" placeholder="Wake up!" class="text-input" />
+        </div>
+        <button class="btn btn-primary full-width" id="setAlarmBtn">Set Alarm</button>
+      </div>
+      <div class="alarms-list-card">
+        <h3>Active Alarms</h3>
+        <div id="alarmsList" class="alarms-list">
+          <p class="empty-state">No alarms set.</p>
+        </div>
+      </div>
+    </div>
+    <!-- Alarm ringing overlay -->
+    <div class="alarm-overlay" id="alarmOverlay" hidden>
+      <div class="alarm-popup">
+        <div class="alarm-ring-icon">⏰</div>
+        <h2 id="alarmPopupLabel">Alarm!</h2>
+        <div class="alarm-popup-btns">
+          <button class="btn btn-outline" id="snoozeBtn">💤 Snooze 5 min</button>
+          <button class="btn btn-danger" id="stopAlarmBtn">■ Stop</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TIMER SECTION ===== -->
+  <section class="tab-section" id="tab-timer">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Countdown Timer</h1>
+        <p class="section-subtitle">Focus & productivity</p>
+      </div>
+    </div>
+    <div class="tool-layout centered">
+      <div class="tool-card wide">
+        <div class="timer-inputs" id="timerInputs">
+          <div class="timer-input-group">
+            <input type="number" id="timerHours" min="0" max="99" value="0" class="timer-digit-input" />
+            <label>HH</label>
+          </div>
+          <span class="timer-colon">:</span>
+          <div class="timer-input-group">
+            <input type="number" id="timerMinutes" min="0" max="59" value="5" class="timer-digit-input" />
+            <label>MM</label>
+          </div>
+          <span class="timer-colon">:</span>
+          <div class="timer-input-group">
+            <input type="number" id="timerSeconds" min="0" max="59" value="0" class="timer-digit-input" />
+            <label>SS</label>
+          </div>
+        </div>
+
+        <div class="timer-display" id="timerDisplay" hidden>00:00:00</div>
+
+        <div class="progress-wrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="timerProgress"></div>
+          </div>
+          <span class="progress-pct" id="timerPct">100%</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="timerStartBtn">▶ Start</button>
+          <button class="btn btn-outline" id="timerPauseBtn" disabled>⏸ Pause</button>
+          <button class="btn btn-outline" id="timerResetBtn">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STOPWATCH SECTION ===== -->
+  <section class="tab-section" id="tab-stopwatch">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Stopwatch</h1>
+        <p class="section-subtitle">Track elapsed time & laps</p>
+      </div>
+    </div>
+    <div class="tool-layout centered">
+      <div class="tool-card wide">
+        <div class="stopwatch-display" id="swDisplay">00:00:00.00</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="swStartBtn">▶ Start</button>
+          <button class="btn btn-outline" id="swLapBtn" disabled>⊕ Lap</button>
+          <button class="btn btn-outline" id="swResetBtn">↺ Reset</button>
+          <button class="btn btn-outline" id="swExportBtn">⬇ Export Laps</button>
+        </div>
+        <div class="laps-container" id="lapsContainer">
+          <p class="empty-state">No laps recorded.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ EVENT MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" id="eventModal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Event</h2>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Event Title *</label>
+        <input type="text" id="evTitle" placeholder="Meeting, Birthday…" class="text-input" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="evDescription" placeholder="Details…" class="text-input textarea"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="evDate" class="text-input" />
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="time" id="evTime" class="text-input" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="evCategory" class="text-input">
+            <option value="work">💼 Work</option>
+            <option value="personal">🏠 Personal</option>
+            <option value="birthday">🎂 Birthday</option>
+            <option value="other">📌 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <input type="color" id="evColor" value="#2563eb" class="color-picker" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Recurring</label>
+        <select id="evRecurring" class="text-input">
+          <option value="none">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalSave">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<audio id="alarmAudio" loop></audio>
+<audio id="notifAudio"></audio>
+
+</body>
+</html>
